@@ -1,0 +1,31 @@
+name: Deploy Web Application
+
+on:
+  push:
+    branches:
+      - main  
+
+jobs:
+  deploy_to_vds:
+    runs-on: self-hosted  
+
+    steps:
+      - name: Copy project files
+        uses: actions/checkout@v4  
+
+      - name: Stop and clean old docker containers
+        run: |
+          sudo docker stop my-web-app || true
+          sudo docker rm my-web-app || true
+
+      - name: Build new Docker Image
+        run: |
+          sudo docker build -t my-site:latest .
+
+      - name: Run Docker Container
+        run: |
+          sudo docker run -d --name my-web-app -p 3000:80 --restart always my-site:latest
+
+      - name: Show status
+        run: |
+          sudo docker ps
